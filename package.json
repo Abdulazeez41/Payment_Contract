@@ -1,0 +1,25 @@
+{
+  "name": "easyswap",
+  "version": "1.0.0",
+  "description": "An app that makes swap on sushiswap",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ThePhoenixTeam/EasySwap.git"
+  },
+  "author": "The phoenix team",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ThePhoenixTeam/EasySwap/issues"
+  },
+  "homepage": "https://github.com/ThePhoenixTeam/EasySwap#readme",
+  "devDependencies": {
+    "mocha": "^9.0.3"
+  }
+}
