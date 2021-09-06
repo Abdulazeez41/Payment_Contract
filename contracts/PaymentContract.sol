@@ -6,9 +6,8 @@ import "./uniswapv2/interfaces/IUniswapV2Router02.sol";
 import "./uniswapv2/interfaces/IERC20.sol";
 import "./uniswapv2/interfaces/IWETH.sol";
 import "./uniswapv2/libraries/UniswapV2Library.sol";
-//import "./openzeppelin/access/Ownable.sol";
 
-contract PaymentContract is {
+contract PaymentContract {
 	
     address public owner;
     address public swapRouter;
@@ -69,13 +68,12 @@ contract PaymentContract is {
         vendor memory newVendor;
         newVendor.vendorAddress = msg.sender;
         newVendor.vendorBalance = 0;
-
+        
         vendors.push(newVendor);
         emit newVendorRegistered(_Id, msg.sender);
         isVendor[msg.sender] = true;
         return _Id;
     }
-
 
 
 	// Allows a buyer to make payment 
@@ -85,7 +83,7 @@ contract PaymentContract is {
         // Always take WBNB path to get a better rate 
         address[] memory _path;
         if (_token == WBNB) {
-            _path = new address[](2);
+             _path = new address[](2);
             _path[0] = _token;
             _path[1] = stableCoin;
         } else{
@@ -114,20 +112,20 @@ contract PaymentContract is {
     function _requiredTokenAmount(uint _amountInUSD, address[] memory _path) internal view returns(uint256) {
         address _factory = IUniswapV2Router02(swapRouter).factory();
         uint256[] memory _tokenAmount = UniswapV2Library.getAmountsIn(_factory, _amountInUSD, _path);
-        return _tokenAmount[2];
+        return _tokenAmount[0];
     }
 
     // Swap from tokens to a stablecoin
-	function _swap(uint256 _tokenamount, uint256 _amountInUSD, address[] memory _path) internal {
+	function _swap(uint256 _tokenAmount, uint256 _amountInUSD, address[] memory _path) internal {
 
         // msg.sender must approve this contract to spend their tokens
 
-        address _token = _path[0];
         // Transfer the specified amount of tokens to this contract.
-        TransferHelper.safeTransferFrom(_token, msg.sender, address(this), _tokenamount);
+        address _token = _path[0];
+        TransferHelper.safeTransferFrom(_token, msg.sender, address(this), _tokenAmount);
 
         // Approve the router to swap token.
-        TransferHelper.safeApprove(_token, swapRouter, _tokenamount);
+        TransferHelper.safeApprove(_token, swapRouter, _tokenAmount);
 
         IUniswapV2Router02(swapRouter).swapTokensForExactTokens(
             _amountInUSD,
