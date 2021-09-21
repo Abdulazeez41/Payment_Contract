@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT;
 pragma solidity =0.6.12;
 
-import "./uniswapv2/libraries/TransferHelper.sol";
-import "./uniswapv2/interfaces/IUniswapV2Router02.sol";
-import "./uniswapv2/interfaces/IERC20.sol";
-import "./uniswapv2/interfaces/IWETH.sol";
-import "./uniswapv2/libraries/UniswapV2Library.sol";
+import "https://github.com/sushiswap/sushiswap/blob/canary/contracts/uniswapv2/interfaces/IUniswapV2Router02.sol";
+import "https://github.com/sushiswap/sushiswap/blob/canary/contracts/uniswapv2/libraries/UniswapV2Library.sol";
+import "https://github.com/sushiswap/sushiswap/blob/canary/contracts/uniswapv2/interfaces/IWETH.sol";
+import "https://github.com/sushiswap/sushiswap/blob/canary/contracts/uniswapv2/libraries/TransferHelper.sol";
+import "https://github.com/sushiswap/sushiswap/blob/canary/contracts/uniswapv2/interfaces/IERC20.sol";
 
 contract PaymentContract {
 	
