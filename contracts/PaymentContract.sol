@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT;
 pragma solidity =0.6.12;
 
-import "https://github.com/sushiswap/sushiswap/blob/canary/contracts/uniswapv2/interfaces/IUniswapV2Router02.sol";
 import "https://github.com/sushiswap/sushiswap/blob/canary/contracts/uniswapv2/libraries/UniswapV2Library.sol";
-import "https://github.com/sushiswap/sushiswap/blob/canary/contracts/uniswapv2/interfaces/IWETH.sol";
 import "https://github.com/sushiswap/sushiswap/blob/canary/contracts/uniswapv2/libraries/TransferHelper.sol";
 import "https://github.com/sushiswap/sushiswap/blob/canary/contracts/uniswapv2/interfaces/IERC20.sol";
+import "https://github.com/sushiswap/sushiswap/blob/canary/contracts/uniswapv2/interfaces/IWETH.sol";
+import "https://github.com/sushiswap/sushiswap/blob/canary/contracts/uniswapv2/interfaces/IUniswapV2Router02.sol";
 
 contract PaymentContract {
 	
@@ -93,12 +93,25 @@ contract PaymentContract {
             _path[2] = stableCoin;
         }
 
-        // Get the amount of token to swap
-        uint _tokenamount = _requiredTokenAmount(_amountInUSD, _path);
 
-        // Takes the token from buyer account and swap to stableCoin
-		_swap(_tokenamount, _amountInUSD, _path);
+        // msg.sender must approve this contract to spend their tokens
 
+        
+        if (_token != stableCoin) {
+            // Get the amount of token to swap
+            uint _tokenAmount = _requiredTokenAmount(_amountInUSD, _path);
+        
+            // Takes the tokens from buyer account
+            TransferHelper.safeTransferFrom(_token, msg.sender, address(this), _tokenAmount);
+        
+        
+            // Swap to stableCoin
+		    _swap(_tokenAmount, _amountInUSD, _path);
+        }
+        
+        else {
+            TransferHelper.safeTransferFrom(_token, msg.sender, address(this), _amountInUSD);
+        }
         // Updates vendor's balance
         vendors[_vendorId].vendorBalance = _amountInUSD;
 
@@ -109,27 +122,20 @@ contract PaymentContract {
 
     // Internal funtions
 
-    function _requiredTokenAmount(uint _amountInUSD, address[] memory _path) internal view returns(uint256) {
-        address _factory = IUniswapV2Router02(swapRouter).factory();
-        uint256[] memory _tokenAmount = UniswapV2Library.getAmountsIn(_factory, _amountInUSD, _path);
+    function _requiredTokenAmount(uint _amountInUSD, address[] memory _path) public view returns(uint256) {
+        uint256[] memory _tokenAmount = IUniswapV2Router02(swapRouter).getAmountsIn(_amountInUSD, _path);
         return _tokenAmount[0];
     }
 
     // Swap from tokens to a stablecoin
 	function _swap(uint256 _tokenAmount, uint256 _amountInUSD, address[] memory _path) internal {
-
-        // msg.sender must approve this contract to spend their tokens
-
-        // Transfer the specified amount of tokens to this contract.
-        address _token = _path[0];
-        TransferHelper.safeTransferFrom(_token, msg.sender, address(this), _tokenAmount);
-
+        
         // Approve the router to swap token.
-        TransferHelper.safeApprove(_token, swapRouter, _tokenAmount);
+        TransferHelper.safeApprove(_path[0], swapRouter, _tokenAmount);
 
         IUniswapV2Router02(swapRouter).swapTokensForExactTokens(
             _amountInUSD,
-            _tokenAmount + slippage / 100 * _tokenAmount,
+            _tokenAmount + (slippage / 100) * _tokenAmount,
             _path,
             address(this),
             block.timestamp
